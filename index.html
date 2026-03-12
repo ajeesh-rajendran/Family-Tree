@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="വാരാവിൽ കുടുംബം — Vaaravil Family Tree. An interactive family tree viewer and editor spanning 6+ generations." />
+  <title>വാരാവിൽ കുടുംബം — Vaaravil Family</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+  <!-- Malayalam font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@400;600;700&display=swap" rel="stylesheet" />
+  <!-- PDF libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar-brand">
+      <img src="assets/logo.png" alt="Vaaravil Logo" class="logo-img" />
+      <div class="brand-text">
+        <h1 class="brand-ml">വാരാവിൽ കുടുംബം</h1>
+        <span class="brand-en">Vaaravil Family</span>
+      </div>
+    </div>
+    
+    <div class="navbar-actions">
+      <!-- Latest features on top -->
+      <button class="btn btn-ghost" id="btnExpandAll" title="Expand All">⊞ Expand All</button>
+      <button class="btn btn-ghost" id="btnCollapseAll" title="Collapse All">⊟ Collapse All</button>
+      <button class="btn btn-secondary" id="btnAddRoot" style="display: none;" title="Add Root Person">➕ Add Root</button>
+      <button class="btn btn-secondary" id="btnExportPdf" title="Export as A4 PDF">📄 Export PDF</button>
+      
+      <div class="divider"></div>
+      
+      <div class="stats-group">
+        <span class="mode-badge read-only" id="modeBadge">👁 Read Only</span>
+        <span id="statsInfo" class="stats-text">0 members</span>
+      </div>
+      
+      <button class="btn btn-primary" id="btnLogin">🔐 Admin Login</button>
+    </div>
+  </nav>
+
+  <!-- ===== TREE ===== -->
+  <div class="tree-wrapper">
+    <div class="tree-container" id="treeContainer">
+      <!-- Tree nodes rendered here by JS -->
+    </div>
+  </div>
+
+  <!-- ===== PERSON DETAIL MODAL ===== -->
+  <div class="modal-overlay" id="personModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Person Details</h2>
+        <button class="btn btn-icon btn-ghost" id="modalCloseBtn">✕</button>
+      </div>
+      <div class="modal-body" id="personForm">
+        <!-- Member Section -->
+        <div class="form-section-label">👤 Family Member</div>
+        <div class="form-group">
+          <label for="personName">Full Name</label>
+          <input type="text" id="personName" placeholder="Enter full name" />
+        </div>
+        <div class="form-group" id="memberMobileGroup">
+          <label for="personMobile">Mobile Number</label>
+          <input type="text" id="personMobile" placeholder="+91 XXXXX XXXXX" />
+        </div>
+        <div class="form-group">
+          <label for="personAddress">Address</label>
+          <textarea id="personAddress" placeholder="Enter address"></textarea>
+        </div>
+        <div class="form-check late-check">
+          <input type="checkbox" id="personLate" />
+          <label for="personLate">Late (Deceased)</label>
+        </div>
+
+        <hr class="form-divider" />
+
+        <!-- Spouse Section -->
+        <div class="form-section-label">💑 Spouse</div>
+        <div class="form-group">
+          <label for="personSpouse">Spouse Name</label>
+          <input type="text" id="personSpouse" placeholder="Enter spouse name (optional)" />
+        </div>
+        <div class="form-group" id="spouseMobileGroup">
+          <label for="spouseMobile">Spouse Mobile Number</label>
+          <input type="text" id="spouseMobile" placeholder="+91 XXXXX XXXXX" />
+        </div>
+        <div class="form-check late-check">
+          <input type="checkbox" id="spouseLate" />
+          <label for="spouseLate">Spouse Late (Deceased)</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="modalDeleteBtn" style="margin-right: auto;">🗑 Delete</button>
+        <button class="btn btn-secondary" id="modalCancelBtn">Cancel</button>
+        <button class="btn btn-primary" id="modalSaveBtn">💾 Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LOGIN MODAL ===== -->
+  <div class="modal-overlay login-modal" id="loginModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Admin Login</h2>
+        <button class="btn btn-icon btn-ghost" id="loginCloseBtn">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="login-icon">🔐</div>
+        <div class="login-title">Admin Access</div>
+        <div class="login-subtitle">Enter the admin password to enable editing</div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" placeholder="Enter admin password" />
+        </div>
+        <div class="login-error" id="loginError">Incorrect password</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="loginCancelBtn">Cancel</button>
+        <button class="btn btn-primary" id="loginSubmitBtn">🔓 Login</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PDF LOADING OVERLAY ===== -->
+  <div class="pdf-loading-overlay" id="pdfLoadingOverlay">
+    <div class="pdf-loading-content">
+      <div class="pdf-spinner"></div>
+      <p>Generating PDF...</p>
+      <p class="pdf-loading-sub">Please wait while the family tree is being exported</p>
+    </div>
+  </div>
+
+  <!-- ===== TOAST CONTAINER ===== -->
+  <div class="toast-container"></div>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="js/auth.js"></script>
+  <script src="js/tree.js"></script>
+  <script src="js/modal.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/pdf-export.js"></script>
+
+</body>
+</html>
