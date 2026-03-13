@@ -52,12 +52,14 @@ const App = (() => {
     const loginBtn = document.getElementById('btnLogin');
     const addRootBtn = document.getElementById('btnAddRoot');
 
+    const rootId = FamilyTree.getRootId();
+
     if (admin) {
       badge.className = 'mode-badge admin';
       badge.innerHTML = '🔓 Admin Mode';
       loginBtn.innerHTML = '🚪 Logout';
       loginBtn.className = 'btn btn-secondary';
-      addRootBtn.style.display = '';
+      addRootBtn.style.display = rootId ? 'none' : '';
     } else {
       badge.className = 'mode-badge read-only';
       badge.innerHTML = '👁 Read Only';
@@ -68,7 +70,6 @@ const App = (() => {
 
     // Update stats
     const totalPersons = FamilyTree.getTotalPersons();
-    const rootId = FamilyTree.getRootId();
     const data = FamilyTree.getTree();
     const generations = rootId ? FamilyTree.getGenerationCount(rootId, data) : 0;
     document.getElementById('statsInfo').textContent = `${totalPersons} members · ${generations} generation${generations !== 1 ? 's' : ''}`;
