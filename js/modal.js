@@ -221,7 +221,7 @@ const Modal = (() => {
     addingParentChildId = null;
   }
 
-  function save() {
+  async function save() {
     const els = getElements();
     const name = els.nameInput.value.trim();
     if (!name) {
@@ -241,22 +241,30 @@ const Modal = (() => {
       spouseIsLate: els.spouseLateCheckbox.checked,
     };
 
+    // Disable button to prevent double-click
+    const prevText = els.saveBtn.innerHTML;
+    els.saveBtn.disabled = true;
+    els.saveBtn.innerHTML = '⏳ Saving...';
+
     if (isAddingChild) {
-      FamilyTree.addPerson({ ...updates, parentId: addingChildParentId });
+      await FamilyTree.addPerson({ ...updates, parentId: addingChildParentId });
       showToast('Child person added successfully', 'success');
     } else if (isAddingParent) {
-      FamilyTree.addParent(addingParentChildId, updates);
+      await FamilyTree.addParent(addingParentChildId, updates);
       showToast('Parent person added successfully', 'success');
     } else if (currentPersonId) {
-      FamilyTree.updatePerson(currentPersonId, updates);
+      await FamilyTree.updatePerson(currentPersonId, updates);
       showToast('Changes saved', 'success');
     }
 
+    els.saveBtn.disabled = false;
+    els.saveBtn.innerHTML = prevText;
+    
     close();
     App.renderTree();
   }
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!currentPersonId) return;
     const person = FamilyTree.getPerson(currentPersonId);
     if (!person) return;
@@ -268,8 +276,17 @@ const Modal = (() => {
     }
 
     if (confirm(msg)) {
-      FamilyTree.deletePerson(currentPersonId);
+      const els = getElements();
+      const prevText = els.deleteBtn.innerHTML;
+      els.deleteBtn.disabled = true;
+      els.deleteBtn.innerHTML = '⏳ Deleting...';
+      
+      await FamilyTree.deletePerson(currentPersonId);
       showToast('Person deleted', 'info');
+      
+      els.deleteBtn.disabled = false;
+      els.deleteBtn.innerHTML = prevText;
+      
       close();
       App.renderTree();
     }

@@ -3,8 +3,9 @@
    ============================================ */
 
 const App = (() => {
-  function init() {
+  async function init() {
     Modal.init();
+    await FamilyTree.loadTree(); // Load from backend
     updateMode();
     renderTree();
 
@@ -240,5 +241,5 @@ const App = (() => {
 
 // --- Bootstrap ---
 document.addEventListener('DOMContentLoaded', () => {
-  App.init();
+  App.init().catch(e => console.error('App init failed:', e));
 });
